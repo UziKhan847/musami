@@ -1,4 +1,3 @@
-
 import 'package:test/test.dart';
 
 import '../bin/lexer/lexer.dart';
@@ -36,6 +35,33 @@ void main() {
       expect(token.value, srcCode[i]);
       expect(token.lineIndex, i);
       expect(token.lineNumber, 1);
+
+      token = lexer.getNextToken();
+    }
+  });
+
+   test('multi character test', () {
+    final srcCode = '==>=<=!=&&||';
+    final lexer = Lexer(srcCode);
+    final types = [
+      TokenTypes.equalEqual,
+      TokenTypes.greaterThanEqualTo,
+      TokenTypes.lessThanEqualTo,
+      TokenTypes.notEqual,
+      TokenTypes.and,
+      TokenTypes.or,
+    ];
+    Token token = lexer.getNextToken();
+
+    int x = 0;
+
+    for (int i = 0; token.type != TokenTypes.eof; i += 2) {
+      expect(token.type, types[x]);
+      expect(token.value, srcCode[i] + srcCode[i + 1]);
+      expect(token.lineIndex, i);
+      expect(token.lineNumber, 1);
+
+      x++;
 
       token = lexer.getNextToken();
     }

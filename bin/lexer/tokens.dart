@@ -37,7 +37,7 @@ enum TokenTypes {
 
   // Keywords
   classToken,
-  function,
+  function, //What word is used for function?
   ifToken, //if comes, then it is if token, i dont have to care about the bracktes after it?
   forToken,
   whileToken,

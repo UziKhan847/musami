@@ -2,7 +2,8 @@ import 'lexer/tokens.dart';
 import 'lexer/lexer.dart';
 
 void main(List<String> arguments) {
-  final lexer = Lexer('  ==+');
+  final lexer = Lexer(
+      '2+2'); //After a String, must there be a spcae? I think yes
 
   Token token = lexer.getNextToken();
 

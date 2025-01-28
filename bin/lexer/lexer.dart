@@ -1,7 +1,6 @@
 import 'tokens.dart';
 
 class Error implements Exception {
-
   Error(this.currentLine, this.lineIndex, this.message);
 
   String message;
@@ -11,7 +10,6 @@ class Error implements Exception {
   @override
   String toString() => "Error on Line $currentLine, Index $lineIndex. $message";
 }
-
 
 class Lexer {
   Lexer(this.sourceCode);
@@ -32,22 +30,13 @@ class Lexer {
     }
   }
 
-  String peak() {
-    if (currentIndex < sourceCode.length - 1) {
-      return sourceCode[currentIndex + 1];
-    }
-    return "End of Source Code";
-  }
-
   Token collectIdentifier() {
     final start = lineIndex;
-    final nextChar = peak();
 
-    String id = sourceCode[currentIndex];
+    String id = currentChar;
     advance();
 
-    if (!nextChar.contains(RegExp('[\n ]'))) {
-
+    if (!currentChar.contains(RegExp('[\n ]'))) {
       if (currentIndex < sourceCode.length) {
         while (currentChar.contains(RegExp('[A-Za-z_0-9]'))) {
           id += currentChar;
@@ -58,6 +47,109 @@ class Lexer {
           }
 
           advance();
+
+          if (currentChar.contains(RegExp('[\n ]'))) {
+            switch (id) {
+              case 'true':
+                return Token(
+                  lineNumber: currentLine,
+                  lineIndex: start,
+                  type: TokenTypes.trueToken,
+                  value: id,
+                );
+              case 'false':
+                return Token(
+                  lineNumber: currentLine,
+                  lineIndex: start,
+                  type: TokenTypes.falseToken,
+                  value: id,
+                );
+              case 'class':
+                return Token(
+                  lineNumber: currentLine,
+                  lineIndex: start,
+                  type: TokenTypes.identifiers,
+                  value: id,
+                );
+              case 'function':
+                return Token(
+                  lineNumber: currentLine,
+                  lineIndex: start,
+                  type: TokenTypes.function,
+                  value: id,
+                );
+              case 'if':
+                return Token(
+                  lineNumber: currentLine,
+                  lineIndex: start,
+                  type: TokenTypes.ifToken,
+                  value: id,
+                );
+              case 'for':
+                return Token(
+                  lineNumber: currentLine,
+                  lineIndex: start,
+                  type: TokenTypes.forToken,
+                  value: id,
+                );
+              case 'while':
+                return Token(
+                  lineNumber: currentLine,
+                  lineIndex: start,
+                  type: TokenTypes.whileToken,
+                  value: id,
+                );
+              case 'else':
+                return Token(
+                  lineNumber: currentLine,
+                  lineIndex: start,
+                  type: TokenTypes.elseToken,
+                  value: id,
+                );
+              case 'null':
+                return Token(
+                  lineNumber: currentLine,
+                  lineIndex: start,
+                  type: TokenTypes.nullToken,
+                  value: id,
+                );
+              case 'return':
+                return Token(
+                  lineNumber: currentLine,
+                  lineIndex: start,
+                  type: TokenTypes.returnToken,
+                  value: id,
+                );
+              case 'var':
+                return Token(
+                  lineNumber: currentLine,
+                  lineIndex: start,
+                  type: TokenTypes.varToken,
+                  value: id,
+                );
+              case 'this':
+                return Token(
+                  lineNumber: currentLine,
+                  lineIndex: start,
+                  type: TokenTypes.thisToken,
+                  value: id,
+                );
+              case 'super':
+                return Token(
+                  lineNumber: currentLine,
+                  lineIndex: start,
+                  type: TokenTypes.superToken,
+                  value: id,
+                );
+              case 'print':
+                return Token(
+                  lineNumber: currentLine,
+                  lineIndex: start,
+                  type: TokenTypes.printToken,
+                  value: id,
+                );
+            }
+          }
         }
       }
     }
@@ -70,15 +162,96 @@ class Lexer {
     );
   }
 
-    Token collectNumber() {
+  Token collectNumber() {
     final start = lineIndex;
-    final nextChar = peak();
 
-    String number = sourceCode[currentIndex];
+    String number = currentChar;
     advance();
 
-    if (!nextChar.contains(RegExp('[\n ]'))) {
+    if (!currentChar.contains(RegExp('[\n ]'))) {
+      if ((number != '0' && !currentChar.contains(RegExp('[0-9.]'))) ||
+          (number == '0' && !currentChar.contains(RegExp('[0-9.bx]')))) {
+        throw Error(currentLine, lineIndex, 'Invalid number.');
+      }
+
       if (currentIndex < sourceCode.length) {
+        if (number == '0') {
+          while (currentChar == '0') {
+            advance();
+          }
+
+          if (currentChar == 'b') {
+            number = '';
+            advance();
+
+            if (!currentChar.contains(RegExp('[01]'))) {
+              throw Error(currentLine, lineIndex, "Invalid binary number.");
+            }
+
+            while (currentChar.contains(RegExp('[01]'))) {
+              number += currentChar;
+
+              if (currentIndex >= sourceCode.length - 1) {
+                currentIndex++;
+                break;
+              }
+
+              advance();
+
+              if (!currentChar.contains(RegExp('[01\n ]'))) {
+                throw Error(currentLine, lineIndex, "Invalid binary number.");
+              }
+            }
+
+            //Convert Binary to Normal number
+
+            return Token(
+              lineNumber: currentLine,
+              lineIndex: start,
+              type: TokenTypes.number,
+              value: number,
+            );
+          } else if (currentChar == 'x') {
+            number = '';
+            advance();
+
+            if (!currentChar.contains(RegExp('[0-9A-Fa-f]'))) {
+              throw Error(
+                  currentLine, lineIndex, "Invalid hexadecimal number.");
+            }
+
+            while (currentChar.contains(RegExp('[0-9A-Fa-f]'))) {
+              number += currentChar;
+
+              if (currentIndex >= sourceCode.length - 1) {
+                currentIndex++;
+                break;
+              }
+
+              advance();
+
+              if (!currentChar.contains(RegExp('[0-9A-Fa-f\n ]'))) {
+                throw Error(
+                    currentLine, lineIndex, "Invalid hexadecimal number.");
+              }
+            }
+
+            //Convert Hex to Normal number
+
+            return Token(
+              lineNumber: currentLine,
+              lineIndex: start,
+              type: TokenTypes.number,
+              value: number,
+            );
+          }
+        }
+
+        if (currentChar == '.') {
+          number += currentChar;
+          advance();
+        }
+
         while (currentChar.contains(RegExp('[0-9]'))) {
           number += currentChar;
 
@@ -88,6 +261,16 @@ class Lexer {
           }
 
           advance();
+
+          if (currentChar == '.') {
+            if (number.contains(RegExp('[.]'))) {
+              throw Error(currentLine, lineIndex,
+                  'Invalid number, too many decimal points.');
+            } else {
+              number += currentChar;
+              advance();
+            }
+          }
         }
       }
     }
@@ -95,7 +278,7 @@ class Lexer {
     return Token(
       lineNumber: currentLine,
       lineIndex: start,
-      type: TokenTypes.identifiers,
+      type: TokenTypes.number,
       value: number,
     );
   }
@@ -127,7 +310,8 @@ class Lexer {
       string += currentChar;
 
       if (currentIndex >= sourceCode.length - 1) {
-        throw Error(currentLine, lineIndex, 'Missing closing quotation for String.');
+        throw Error(
+            currentLine, lineIndex, 'Missing closing quotation for String.');
       }
 
       advance();
@@ -147,7 +331,6 @@ class Lexer {
     TokenTypes type = TokenTypes.eof;
     final preLineNumber = currentLine;
     final preLineIndex = lineIndex;
-    String value = currentChar;
 
     while (currentChar.contains(RegExp('[\n ]'))) {
       lineIndex++;
@@ -168,6 +351,8 @@ class Lexer {
         currentChar = sourceCode[currentIndex];
       }
     }
+
+    String value = currentChar;
 
     if (currentIndex < sourceCode.length) {
       currentChar = sourceCode[currentIndex];
@@ -274,7 +459,7 @@ class Lexer {
         case '|':
           advance();
           if (currentChar == '|') {
-            type = TokenTypes.and;
+            type = TokenTypes.or;
             value += currentChar;
             advance();
           } else {
