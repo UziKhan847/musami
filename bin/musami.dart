@@ -3,7 +3,7 @@ import 'lexer/lexer.dart';
 
 void main(List<String> arguments) {
   final lexer = Lexer(
-      '1.2.0 3.4.5 6'); 
+      'print.true45class().this'); 
 
   Token token = lexer.getNextToken();
 

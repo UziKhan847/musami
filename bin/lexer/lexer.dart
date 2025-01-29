@@ -50,108 +50,105 @@ class Lexer {
 
           advance();
 
-          if (currentChar.contains(RegExp('[\n ]')) ||
-              currentIndex >= sourceCode.length) {
-            switch (id) {
-              case 'true':
-                return Token(
-                  lineNumber: currentLine,
-                  lineIndex: start,
-                  type: TokenTypes.trueToken,
-                  value: id,
-                );
-              case 'false':
-                return Token(
-                  lineNumber: currentLine,
-                  lineIndex: start,
-                  type: TokenTypes.falseToken,
-                  value: id,
-                );
-              case 'class':
-                return Token(
-                  lineNumber: currentLine,
-                  lineIndex: start,
-                  type: TokenTypes.classToken,
-                  value: id,
-                );
-              case 'fun':
-                return Token(
-                  lineNumber: currentLine,
-                  lineIndex: start,
-                  type: TokenTypes.function,
-                  value: id,
-                );
-              case 'if':
-                return Token(
-                  lineNumber: currentLine,
-                  lineIndex: start,
-                  type: TokenTypes.ifToken,
-                  value: id,
-                );
-              case 'for':
-                return Token(
-                  lineNumber: currentLine,
-                  lineIndex: start,
-                  type: TokenTypes.forToken,
-                  value: id,
-                );
-              case 'while':
-                return Token(
-                  lineNumber: currentLine,
-                  lineIndex: start,
-                  type: TokenTypes.whileToken,
-                  value: id,
-                );
-              case 'else':
-                return Token(
-                  lineNumber: currentLine,
-                  lineIndex: start,
-                  type: TokenTypes.elseToken,
-                  value: id,
-                );
-              case 'null':
-                return Token(
-                  lineNumber: currentLine,
-                  lineIndex: start,
-                  type: TokenTypes.nullToken,
-                  value: id,
-                );
-              case 'return':
-                return Token(
-                  lineNumber: currentLine,
-                  lineIndex: start,
-                  type: TokenTypes.returnToken,
-                  value: id,
-                );
-              case 'var':
-                return Token(
-                  lineNumber: currentLine,
-                  lineIndex: start,
-                  type: TokenTypes.varToken,
-                  value: id,
-                );
-              case 'this':
-                return Token(
-                  lineNumber: currentLine,
-                  lineIndex: start,
-                  type: TokenTypes.thisToken,
-                  value: id,
-                );
-              case 'super':
-                return Token(
-                  lineNumber: currentLine,
-                  lineIndex: start,
-                  type: TokenTypes.superToken,
-                  value: id,
-                );
-              case 'print':
-                return Token(
-                  lineNumber: currentLine,
-                  lineIndex: start,
-                  type: TokenTypes.printToken,
-                  value: id,
-                );
-            }
+          switch (id) {
+            case 'true':
+              return Token(
+                lineNumber: currentLine,
+                lineIndex: start,
+                type: TokenTypes.trueToken,
+                value: id,
+              );
+            case 'false':
+              return Token(
+                lineNumber: currentLine,
+                lineIndex: start,
+                type: TokenTypes.falseToken,
+                value: id,
+              );
+            case 'class':
+              return Token(
+                lineNumber: currentLine,
+                lineIndex: start,
+                type: TokenTypes.classToken,
+                value: id,
+              );
+            case 'fun':
+              return Token(
+                lineNumber: currentLine,
+                lineIndex: start,
+                type: TokenTypes.function,
+                value: id,
+              );
+            case 'if':
+              return Token(
+                lineNumber: currentLine,
+                lineIndex: start,
+                type: TokenTypes.ifToken,
+                value: id,
+              );
+            case 'for':
+              return Token(
+                lineNumber: currentLine,
+                lineIndex: start,
+                type: TokenTypes.forToken,
+                value: id,
+              );
+            case 'while':
+              return Token(
+                lineNumber: currentLine,
+                lineIndex: start,
+                type: TokenTypes.whileToken,
+                value: id,
+              );
+            case 'else':
+              return Token(
+                lineNumber: currentLine,
+                lineIndex: start,
+                type: TokenTypes.elseToken,
+                value: id,
+              );
+            case 'null':
+              return Token(
+                lineNumber: currentLine,
+                lineIndex: start,
+                type: TokenTypes.nullToken,
+                value: id,
+              );
+            case 'return':
+              return Token(
+                lineNumber: currentLine,
+                lineIndex: start,
+                type: TokenTypes.returnToken,
+                value: id,
+              );
+            case 'var':
+              return Token(
+                lineNumber: currentLine,
+                lineIndex: start,
+                type: TokenTypes.varToken,
+                value: id,
+              );
+            case 'this':
+              return Token(
+                lineNumber: currentLine,
+                lineIndex: start,
+                type: TokenTypes.thisToken,
+                value: id,
+              );
+            case 'super':
+              return Token(
+                lineNumber: currentLine,
+                lineIndex: start,
+                type: TokenTypes.superToken,
+                value: id,
+              );
+            case 'print':
+              return Token(
+                lineNumber: currentLine,
+                lineIndex: start,
+                type: TokenTypes.printToken,
+                value: id,
+              );
           }
           if (currentIndex >= sourceCode.length) {
             currentIndex++;
