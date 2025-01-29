@@ -18,7 +18,7 @@ class Lexer {
   int currentLine = 1;
   int lineIndex = 0;
   int currentIndex = 0;
-  late String currentChar = sourceCode[currentIndex];
+  late String currentChar = sourceCode.isEmpty ? '' : sourceCode[currentIndex];
 
   void advance() {
     if (currentIndex < sourceCode.length - 1) {
@@ -28,6 +28,13 @@ class Lexer {
     } else {
       currentIndex++;
     }
+  }
+
+  String peak() {
+    if (currentIndex < sourceCode.length - 1) {
+      return sourceCode[currentIndex + 1];
+    }
+    return 'end';
   }
 
   Token collectIdentifier() {
@@ -41,14 +48,10 @@ class Lexer {
         while (currentChar.contains(RegExp('[A-Za-z_0-9]'))) {
           id += currentChar;
 
-          if (currentIndex >= sourceCode.length - 1) {
-            currentIndex++;
-            break;
-          }
-
           advance();
 
-          if (currentChar.contains(RegExp('[\n ]'))) {
+          if (currentChar.contains(RegExp('[\n ]')) ||
+              currentIndex >= sourceCode.length) {
             switch (id) {
               case 'true':
                 return Token(
@@ -68,10 +71,10 @@ class Lexer {
                 return Token(
                   lineNumber: currentLine,
                   lineIndex: start,
-                  type: TokenTypes.identifiers,
+                  type: TokenTypes.classToken,
                   value: id,
                 );
-              case 'function':
+              case 'fun':
                 return Token(
                   lineNumber: currentLine,
                   lineIndex: start,
@@ -150,6 +153,10 @@ class Lexer {
                 );
             }
           }
+          if (currentIndex >= sourceCode.length) {
+            currentIndex++;
+            break;
+          }
         }
       }
     }
@@ -168,25 +175,12 @@ class Lexer {
     String number = currentChar;
     advance();
 
-    if (!currentChar.contains(RegExp('[\n )}],;:=+-*/><]'))) {
-      if ((number != '0' && !currentChar.contains(RegExp('[0-9.]'))) ||
-          (number == '0' && !currentChar.contains(RegExp('[0-9.bx]')))) {
-        throw Error(currentLine, lineIndex, 'Invalid number.');
-      }
-
+    if (!currentChar.contains(RegExp('[\n ]'))) {
       if (currentIndex < sourceCode.length) {
         if (number == '0') {
-          // while (currentChar == '0') {
-          //   advance();
-          // }
-
-          if (currentChar == 'b') {
+          if (currentChar == 'b' && peak().contains(RegExp('[01]'))) {
             number = '';
             advance();
-
-            if (!currentChar.contains(RegExp('[01]'))) {
-              throw Error(currentLine, lineIndex, "Invalid binary number.");
-            }
 
             while (currentChar.contains(RegExp('[01]'))) {
               number += currentChar;
@@ -197,10 +191,6 @@ class Lexer {
               }
 
               advance();
-
-              if (!currentChar.contains(RegExp('[01\n )}],;:=+-*/><]'))) {
-                throw Error(currentLine, lineIndex, "Invalid binary number.");
-              }
             }
 
             number = '${int.parse(number, radix: 2)}';
@@ -211,14 +201,11 @@ class Lexer {
               type: TokenTypes.number,
               value: number,
             );
-          } else if (currentChar == 'x') {
+          } else if (currentChar == 'x' &&
+              currentIndex < sourceCode.length - 1 &&
+              peak().contains(RegExp('[0-9A-Fa-f]'))) {
             number = '';
             advance();
-
-            if (!currentChar.contains(RegExp('[0-9A-Fa-f]'))) {
-              throw Error(
-                  currentLine, lineIndex, "Invalid hexadecimal number.");
-            }
 
             while (currentChar.contains(RegExp('[0-9A-Fa-f]'))) {
               number += currentChar;
@@ -229,12 +216,6 @@ class Lexer {
               }
 
               advance();
-
-              if (!currentChar
-                  .contains(RegExp('[0-9A-Fa-f\n )}],;:=+-*/><]'))) {
-                throw Error(
-                    currentLine, lineIndex, "Invalid hexadecimal number.");
-              }
             }
 
             number = '${int.parse(number, radix: 16)}';
@@ -253,11 +234,11 @@ class Lexer {
         }
 
         if (currentChar == '.') {
-          number += currentChar;
-          advance();
+          if (peak().contains(RegExp('[0-9]'))) {
+            number += currentChar;
+            advance();
+          }
         }
-
-        //Error check
 
         while (currentChar.contains(RegExp('[0-9]'))) {
           number += currentChar;
@@ -269,25 +250,26 @@ class Lexer {
 
           advance();
 
-          if (currentChar == '.') {
-            if (number.contains(RegExp('[.]'))) {
-              throw Error(currentLine, lineIndex,
-                  'Invalid number, too many decimal points.');
-            } else {
+          if (currentChar == '.' && !number.contains(RegExp('[.]'))) {
+            if (peak().contains(RegExp('[0-9]'))) {
               number += currentChar;
               advance();
-
-              //Error check???
             }
           }
-
-          //Error check
         }
       }
     }
 
-    if (number[0] == '0' && number[1].contains(RegExp('[1-9]'))) {
+    if (number.length > 1 &&
+        number[0] == '0' &&
+        number[1].contains(RegExp('[1-9]'))) {
       number = number.replaceFirst(RegExp('0'), '');
+    }
+
+    if (number.length > 3 && number.contains(RegExp('[.]'))) {
+      while (number.endsWith('0')) {
+        number = number.substring(0, number.length - 1);
+      }
     }
 
     return Token(
@@ -344,30 +326,75 @@ class Lexer {
 
   Token getNextToken() {
     TokenTypes type = TokenTypes.eof;
-    final preLineNumber = currentLine;
-    final preLineIndex = lineIndex;
 
-    while (currentChar.contains(RegExp('[\n ]'))) {
-      lineIndex++;
+    while (true) {
+      if (currentChar.contains(RegExp('[/ \n]'))) {
+        if (currentChar == '/') {
+          if (peak() == '/') {
+            while (true) {
+              advance();
 
-      if (currentChar == '\n') {
-        currentLine++;
-        lineIndex = 0;
-      }
+              if (currentChar == '\n') {
+                advance();
+                currentLine++;
+                lineIndex = 0;
+                break;
+              }
 
-      if (currentIndex < sourceCode.length) {
-        currentChar = sourceCode[currentIndex];
+              if (currentIndex == sourceCode.length - 1) {
+                advance();
+                break;
+              }
+            }
+          } else if (peak() == '*') {
+            advance();
+            advance();
+
+            while (true) {
+              if (currentChar == '\n') {
+                advance();
+                currentLine++;
+                lineIndex = 0;
+              }
+
+              if (currentIndex < sourceCode.length - 1) {
+                if (currentChar == '*' && peak() == '/') {
+                  advance();
+                  advance();
+                  break;
+                }
+
+                if (currentIndex == sourceCode.length - 2 &&
+                    !sourceCode.endsWith('*/')) {
+                  throw Error(
+                      currentLine, lineIndex, "Missing */ to end the comment");
+                }
+
+                advance();
+              }
+            }
+          } else {
+            break;
+          }
+        }
+
+        while (currentChar.contains(RegExp('[\n ]'))) {
+          if (currentChar == '\n') {
+            advance();
+            currentLine++;
+            lineIndex = 0;
+          } else if (currentChar == ' ') {
+            advance();
+          }
+        }
       } else {
         break;
-      }
-      currentIndex++;
-
-      if (currentIndex < sourceCode.length) {
-        currentChar = sourceCode[currentIndex];
       }
     }
 
     String value = currentChar;
+    final preLineNumber = currentLine;
+    final preLineIndex = lineIndex;
 
     if (currentIndex < sourceCode.length) {
       currentChar = sourceCode[currentIndex];

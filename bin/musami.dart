@@ -3,7 +3,7 @@ import 'lexer/lexer.dart';
 
 void main(List<String> arguments) {
   final lexer = Lexer(
-      '00023+23'); //After a String, must there be a spcae? I think yes
+      '1.2.0 3.4.5 6'); 
 
   Token token = lexer.getNextToken();
 
