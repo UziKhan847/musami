@@ -50,7 +50,13 @@ class Lexer {
 
           advance();
 
-          switch (id) {
+          if (currentIndex >= sourceCode.length) {
+            currentIndex++;
+            break;
+          }
+        }
+
+        switch (id) {
             case 'true':
               return Token(
                 lineNumber: currentLine,
@@ -150,11 +156,6 @@ class Lexer {
                 value: id,
               );
           }
-          if (currentIndex >= sourceCode.length) {
-            currentIndex++;
-            break;
-          }
-        }
       }
     }
 
