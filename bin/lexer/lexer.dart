@@ -168,7 +168,7 @@ class Lexer {
     String number = currentChar;
     advance();
 
-    if (!currentChar.contains(RegExp('[\n ]'))) {
+    if (!currentChar.contains(RegExp('[\n )}],;:=+-*/><]'))) {
       if ((number != '0' && !currentChar.contains(RegExp('[0-9.]'))) ||
           (number == '0' && !currentChar.contains(RegExp('[0-9.bx]')))) {
         throw Error(currentLine, lineIndex, 'Invalid number.');
@@ -176,9 +176,9 @@ class Lexer {
 
       if (currentIndex < sourceCode.length) {
         if (number == '0') {
-          while (currentChar == '0') {
-            advance();
-          }
+          // while (currentChar == '0') {
+          //   advance();
+          // }
 
           if (currentChar == 'b') {
             number = '';
@@ -198,12 +198,12 @@ class Lexer {
 
               advance();
 
-              if (!currentChar.contains(RegExp('[01\n ]'))) {
+              if (!currentChar.contains(RegExp('[01\n )}],;:=+-*/><]'))) {
                 throw Error(currentLine, lineIndex, "Invalid binary number.");
               }
             }
 
-            //Convert Binary to Normal number
+            number = '${int.parse(number, radix: 2)}';
 
             return Token(
               lineNumber: currentLine,
@@ -230,13 +230,14 @@ class Lexer {
 
               advance();
 
-              if (!currentChar.contains(RegExp('[0-9A-Fa-f\n ]'))) {
+              if (!currentChar
+                  .contains(RegExp('[0-9A-Fa-f\n )}],;:=+-*/><]'))) {
                 throw Error(
                     currentLine, lineIndex, "Invalid hexadecimal number.");
               }
             }
 
-            //Convert Hex to Normal number
+            number = '${int.parse(number, radix: 16)}';
 
             return Token(
               lineNumber: currentLine,
@@ -245,12 +246,18 @@ class Lexer {
               value: number,
             );
           }
+
+          while (currentChar == '0') {
+            advance();
+          }
         }
 
         if (currentChar == '.') {
           number += currentChar;
           advance();
         }
+
+        //Error check
 
         while (currentChar.contains(RegExp('[0-9]'))) {
           number += currentChar;
@@ -269,10 +276,18 @@ class Lexer {
             } else {
               number += currentChar;
               advance();
+
+              //Error check???
             }
           }
+
+          //Error check
         }
       }
+    }
+
+    if (number[0] == '0' && number[1].contains(RegExp('[1-9]'))) {
+      number = number.replaceFirst(RegExp('0'), '');
     }
 
     return Token(
