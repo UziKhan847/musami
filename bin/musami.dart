@@ -2,8 +2,7 @@ import 'lexer/tokens.dart';
 import 'lexer/lexer.dart';
 
 void main(List<String> arguments) {
-  final lexer = Lexer(
-      'print.true45class(return).this'); 
+  final lexer = Lexer(' " \asd " ');
 
   Token token = lexer.getNextToken();
 

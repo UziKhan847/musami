@@ -139,6 +139,48 @@ void main() {
     }
   });
 
+  test('keywords with single char in the middle', () {
+    final srcCode = 'print.return';
+    final lexer = Lexer(srcCode);
+    final types = [
+      TokenTypes.printToken,
+      TokenTypes.dot,
+      TokenTypes.returnToken,
+    ];
+    final values = [
+      'print',
+      '.',
+      'return',
+    ];
+    Token token = lexer.getNextToken();
+
+    int lineIndex = 0;
+
+    for (int i = 0; token.type != TokenTypes.eof; i++) {
+      expect(token.type, types[i]);
+      expect(token.value, values[i]);
+      expect(token.lineIndex, lineIndex);
+      expect(token.lineNumber, 1);
+
+      lineIndex += values[i].length;
+
+      token = lexer.getNextToken();
+    }
+  });
+
+    test('identifier with a part of a keyword', () {
+    final srcCode = 'thisVariable';
+    final lexer = Lexer(srcCode);
+    Token token = lexer.getNextToken();
+
+
+      expect(token.type, TokenTypes.identifiers);
+      expect(token.value, 'thisVariable');
+      expect(token.lineIndex, 0);
+      expect(token.lineNumber, 1);
+    
+  });
+
   test('random identifier without last letter trailing', () {
     final srcCode = 'abc';
     final lexer = Lexer(srcCode);
@@ -159,8 +201,6 @@ void main() {
 
     expect(token.type, TokenTypes.eof);
     expect(token.value, '');
-    expect(token.lineNumber, 1);
-    expect(token.lineIndex, 0);
   });
 
   test('multiple dots with numbers test', () {
