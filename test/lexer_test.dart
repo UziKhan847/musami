@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:test/test.dart';
 
 import '../bin/lexer/lexer.dart';
@@ -279,5 +277,15 @@ void main() {
 
       token = lexer.getNextToken();
     }
+  });
+
+  test('backslash within string', () {
+    final srcCode = '\'\\x\'';
+    final lexer = Lexer(srcCode);
+
+    Token token = lexer.getNextToken();
+
+    expect(token.type, TokenTypes.string);
+    expect(token.value, 'x');
   });
 }

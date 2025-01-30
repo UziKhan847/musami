@@ -1,15 +1,5 @@
 import 'tokens.dart';
-
-class Error implements Exception {
-  Error(this.currentLine, this.lineIndex, this.message);
-
-  String message;
-  int currentLine;
-  int lineIndex;
-
-  @override
-  String toString() => "Error on Line $currentLine, Index $lineIndex. $message";
-}
+import 'lexer_error.dart';
 
 class Lexer {
   Lexer(this.sourceCode);
@@ -39,6 +29,7 @@ class Lexer {
 
   Token collectIdentifier() {
     final start = lineIndex;
+    TokenTypes type = TokenTypes.identifiers;
 
     String id = currentChar;
     advance();
@@ -58,103 +49,33 @@ class Lexer {
 
         switch (id) {
           case 'true':
-            return Token(
-              lineNumber: currentLine,
-              lineIndex: start,
-              type: TokenTypes.trueToken,
-              value: id,
-            );
+            type = TokenTypes.trueToken;
           case 'false':
-            return Token(
-              lineNumber: currentLine,
-              lineIndex: start,
-              type: TokenTypes.falseToken,
-              value: id,
-            );
+            type = TokenTypes.falseToken;
           case 'class':
-            return Token(
-              lineNumber: currentLine,
-              lineIndex: start,
-              type: TokenTypes.classToken,
-              value: id,
-            );
+            type = TokenTypes.classToken;
           case 'fun':
-            return Token(
-              lineNumber: currentLine,
-              lineIndex: start,
-              type: TokenTypes.function,
-              value: id,
-            );
+            type = TokenTypes.function;
           case 'if':
-            return Token(
-              lineNumber: currentLine,
-              lineIndex: start,
-              type: TokenTypes.ifToken,
-              value: id,
-            );
+            type = TokenTypes.ifToken;
           case 'for':
-            return Token(
-              lineNumber: currentLine,
-              lineIndex: start,
-              type: TokenTypes.forToken,
-              value: id,
-            );
+            type = TokenTypes.forToken;
           case 'while':
-            return Token(
-              lineNumber: currentLine,
-              lineIndex: start,
-              type: TokenTypes.whileToken,
-              value: id,
-            );
+            type = TokenTypes.whileToken;
           case 'else':
-            return Token(
-              lineNumber: currentLine,
-              lineIndex: start,
-              type: TokenTypes.elseToken,
-              value: id,
-            );
+            type = TokenTypes.elseToken;
           case 'null':
-            return Token(
-              lineNumber: currentLine,
-              lineIndex: start,
-              type: TokenTypes.nullToken,
-              value: id,
-            );
+            type = TokenTypes.nullToken;
           case 'return':
-            return Token(
-              lineNumber: currentLine,
-              lineIndex: start,
-              type: TokenTypes.returnToken,
-              value: id,
-            );
+            type = TokenTypes.returnToken;
           case 'var':
-            return Token(
-              lineNumber: currentLine,
-              lineIndex: start,
-              type: TokenTypes.varToken,
-              value: id,
-            );
+            type = TokenTypes.varToken;
           case 'this':
-            return Token(
-              lineNumber: currentLine,
-              lineIndex: start,
-              type: TokenTypes.thisToken,
-              value: id,
-            );
+            type = TokenTypes.thisToken;
           case 'super':
-            return Token(
-              lineNumber: currentLine,
-              lineIndex: start,
-              type: TokenTypes.superToken,
-              value: id,
-            );
+            type = TokenTypes.superToken;
           case 'print':
-            return Token(
-              lineNumber: currentLine,
-              lineIndex: start,
-              type: TokenTypes.printToken,
-              value: id,
-            );
+            type = TokenTypes.printToken;
         }
       }
     }
@@ -162,7 +83,7 @@ class Lexer {
     return Token(
       lineNumber: currentLine,
       lineIndex: start,
-      type: TokenTypes.identifiers,
+      type: type,
       value: id,
     );
   }
@@ -297,14 +218,16 @@ class Lexer {
           currentLine++;
           lineIndex = 0;
         } else if (peak() == openingQuote) {
-          throw Error(currentLine, lineIndex, 'Invalid String.');
+          throw LexerError(currentLine, lineIndex, 'Invalid String.');
+        } else {
+          advance();
         }
       }
 
       string += currentChar;
 
       if (currentIndex >= sourceCode.length - 1) {
-        throw Error(
+        throw LexerError(
             currentLine, lineIndex, 'Missing closing quotation for String.');
       }
 
@@ -325,6 +248,10 @@ class Lexer {
     TokenTypes type = TokenTypes.eof;
 
     while (true) {
+      if (currentIndex >= sourceCode.length - 1) {
+        break;
+      }
+
       if (currentChar.contains(RegExp('[/ \n]'))) {
         if (currentChar == '/') {
           if (peak() == '/') {
@@ -363,7 +290,7 @@ class Lexer {
 
                 if (currentIndex == sourceCode.length - 2 &&
                     !sourceCode.endsWith('*/')) {
-                  throw Error(
+                  throw LexerError(
                       currentLine, lineIndex, "Missing */ to end the comment");
                 }
 
@@ -382,6 +309,10 @@ class Lexer {
             lineIndex = 0;
           } else if (currentChar == ' ') {
             advance();
+          }
+
+          if (currentIndex >= sourceCode.length - 1) {
+            break;
           }
         }
       } else {
@@ -493,7 +424,7 @@ class Lexer {
             value += currentChar;
             advance();
           } else {
-            throw Error(currentLine, lineIndex, 'Incorrect character');
+            throw LexerError(currentLine, lineIndex, 'Incorrect character');
           }
         case '|':
           advance();
@@ -502,7 +433,7 @@ class Lexer {
             value += currentChar;
             advance();
           } else {
-            throw Error(currentLine, lineIndex, 'Incorrect character');
+            throw LexerError(currentLine, lineIndex, 'Incorrect character');
           }
       }
     }

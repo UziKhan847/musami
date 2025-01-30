@@ -2,7 +2,7 @@ import 'lexer/tokens.dart';
 import 'lexer/lexer.dart';
 
 void main(List<String> arguments) {
-  final lexer = Lexer(' \' \\\'        ');
+  final lexer = Lexer('\'\\x\'');
 
   Token token = lexer.getNextToken();
 
