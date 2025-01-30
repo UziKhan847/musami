@@ -288,13 +288,17 @@ class Lexer {
     advance();
 
     while (currentChar != openingQuote) {
-      if (currentChar == r'\' && peak() == 'n') {
-        advance();
-        advance();
+      if (currentChar == r'\') {
+        if (peak() == 'n') {
+          advance();
+          advance();
 
-        string += '\n';
-        currentLine++;
-        lineIndex = 0;
+          string += '\n';
+          currentLine++;
+          lineIndex = 0;
+        } else if (peak() == openingQuote) {
+          throw Error(currentLine, lineIndex, 'Invalid String.');
+        }
       }
 
       string += currentChar;
